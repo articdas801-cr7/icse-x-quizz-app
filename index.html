@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICSE Class 10 Interactive Quiz Portal</title>
+    <title>ICSE Class 10 Practice Portal</title>
     <style>
         :root {
             --primary: #4f46e5;
@@ -19,94 +19,58 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
-        .container { width: 100%; max-width: 850px; background: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); padding: 32px; height: fit-content; }
+        .container { width: 100%; max-width: 800px; background: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); padding: 32px; height: fit-content; }
         
         .hidden { display: none !important; }
-        h1, h2, h3 { color: var(--text); margin-bottom: 16px; }
+        h1, h2 { color: var(--text); margin-bottom: 12px; }
         p { color: var(--text-muted); margin-bottom: 24px; }
 
         .form-group { margin-bottom: 20px; }
         label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text); }
         select, button { width: 100%; padding: 12px 16px; border-radius: 8px; font-size: 16px; transition: all 0.2s; }
         select { border: 1px solid var(--border); background-color: #fff; outline: none; }
-        select:focus { border-color: var(--primary); }
         
         button { background-color: var(--primary); color: white; border: none; font-weight: 600; cursor: pointer; margin-top: 10px; }
         button:hover { background-color: var(--primary-hover); }
 
-        .loader { display: none; text-align: center; margin: 20px 0; font-weight: 600; color: var(--primary); }
-
         .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
         .options-grid { display: grid; gap: 12px; margin: 20px 0; }
         .option-btn { background: white; border: 2px solid var(--border); color: var(--text); text-align: left; line-height: 1.4; padding: 14px; border-radius: 8px; cursor: pointer; }
-        .option-btn:hover { border-color: var(--primary); background-color: #f0fdf4; }
+        .option-btn:hover { border-color: var(--primary); background-color: #f8fafc; }
         .option-btn.correct { border-color: var(--success); background-color: #f0fdf4; color: #15803d; font-weight: 600; }
         .option-btn.incorrect { border-color: var(--danger); background-color: #fef2f2; color: #b91c1c; font-weight: 600; }
 
         .score-card { background: #eef2ff; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px; }
         .score-num { font-size: 48px; font-weight: 800; color: var(--primary); }
-        .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-        .analytic-box { padding: 16px; border-radius: 8px; border: 1px solid var(--border); }
-        .analytic-box.strengths { background-color: #f0fdf4; border-color: #bbf7d0; }
-        .analytic-box.growth { background-color: #fff7ed; border-color: #fed7aa; }
-        .analytic-box h4 { margin-bottom: 8px; }
-        .analytic-box ul { padding-left: 20px; font-size: 14px; color: var(--text); }
-
-        @media (max-width: 600px) {
-            .analytics-grid { grid-template-columns: 1fr; }
-        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- SETUP SCREEN -->
+    <!-- SELECTION SCREEN -->
     <div id="setup-screen">
-        <h1>ICSE Class 10 Interactive Quiz Portal</h1>
-        <p>Select your subject and chapter to generate custom board-level practice exams.</p>
+        <h1>ICSE Class 10 Practice Portal</h1>
+        <p>Select a subject to start practicing standard questions.</p>
         
         <div class="form-group">
             <label for="subject-select">Select Subject</label>
-            <select id="subject-select" onchange="loadChapters()">
+            <select id="subject-select">
                 <option value="">-- Choose Subject --</option>
                 <option value="Physics">Physics</option>
                 <option value="Chemistry">Chemistry</option>
                 <option value="Biology">Biology</option>
-                <option value="Mathematics">Mathematics</option>
                 <option value="Computer Applications">Computer Applications</option>
-                <option value="Geography">Geography</option>
-                <option value="History & Civics">History & Civics</option>
-                <option value="English Language">English Language</option>
-                <option value="English Literature">English Literature</option>
             </select>
         </div>
 
-        <div class="form-group">
-            <label for="chapter-select">Select Chapter</label>
-            <select id="chapter-select" disabled>
-                <option value="">-- Choose Subject First --</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="count-select">Number of Questions</label>
-            <select id="count-select">
-                <option value="5">5 Questions (Quick Test)</option>
-                <option value="10">10 Questions (Standard Test)</option>
-                <option value="15">15 Questions (Extended Practice)</option>
-                <option value="30" selected>30 Questions (Full Mock Board Exam)</option>
-            </select>
-        </div>
-
-        <button onclick="generateMockQuiz()">Generate & Start Test</button>
-        <div id="loading-spinner" class="loader">Loading ICSE Board questions... Please wait.</div>
+        <button onclick="startQuiz()">Start Test</button>
     </div>
 
     <!-- QUIZ INTERFACE -->
     <div id="quiz-screen" class="hidden">
         <div class="quiz-header">
-            <span id="quiz-chapter-title" style="font-weight: 600;">Chapter</span>
-            <span id="question-progress">Question 1/30</span>
+            <span id="quiz-title" style="font-weight: 600;">Subject</span>
+            <span id="question-progress">Question 1/5</span>
         </div>
         
         <h2 id="question-text">Loading question...</h2>
@@ -115,115 +79,159 @@
         <button id="next-btn" onclick="nextQuestion()" disabled>Select an Answer</button>
     </div>
 
-    <!-- ANALYTICS DASHBOARD -->
+    <!-- SCORE DASHBOARD -->
     <div id="results-screen" class="hidden">
-        <h2>Performance & Diagnostic Report</h2>
-        <p>Comprehensive evaluation of your session performance.</p>
+        <h2>Test Complete</h2>
+        <p>Here is your total score for this session:</p>
 
         <div class="score-card">
-            <div>Total Score</div>
+            <div>Your Score</div>
             <div class="score-num" id="final-score">0 / 0</div>
             <div id="percentage-label" style="font-weight: 600; color: var(--text-muted);">0%</div>
         </div>
 
-        <div class="analytics-grid">
-            <div class="analytic-box strengths">
-                <h4 style="color: #166534;">💪 Strengths</h4>
-                <ul id="strengths-list"></ul>
-            </div>
-            <div class="analytic-box growth">
-                <h4 style="color: #9a3412;">📈 Focus & Growth Areas</h4>
-                <ul id="growth-list"></ul>
-            </div>
-        </div>
-
-        <button onclick="resetApp()">Generate New Quiz</button>
+        <button onclick="resetApp()">Try Another Subject</button>
     </div>
 </div>
 
 <script>
-    const icseSyllabus = {
-        "Physics": ["Force, Work, Power and Energy", "Refraction of Light & Lenses", "Spectrum", "Sound", "Current Electricity", "Household Circuits", "Electromagnetism", "Calorimetry", "Radioactivity"],
-        "Chemistry": ["Periodic Properties and Variations", "Chemical Bonding", "Acids, Bases and Salts", "Analytical Chemistry", "Mole Concept and Stoichiometry", "Electrolysis", "Metallurgy", "Organic Chemistry"],
-        "Biology": ["Structure of Chromosomes & Cell Division", "Genetics", "Absorption by Roots", "Transpiration", "Photosynthesis", "Circulatory System", "Excretory System", "Nervous System & Sense Organs"],
-        "Mathematics": ["Commercial Math", "Linear Inequations", "Quadratic Equations", "Ratio and Proportion", "Matrices", "Arithmetic & Geometric Progression", "Coordinate Geometry", "Trigonometry"],
-        "Computer Applications": ["Revision of Class 9 Java Concepts", "Library & Wrapper Classes", "Arrays (1D and 2D)", "User-Defined Methods", "Constructors", "String Handling in Java"],
-        "Geography": ["Interpretation of Topographical Maps", "Climate of India", "Soil Resources", "Natural Vegetation", "Water Resources", "Agriculture in India"],
-        "History & Civics": ["Union Legislature", "Union Executive", "Judiciary", "First War of Independence (1857)", "Growth of Nationalism", "Mass Phase & Mahatma Gandhi"],
-        "English Language": ["Composition Writing", "Letter Writing", "Notice & Email Writing", "Comprehension Passages", "Applied Grammar"],
-        "English Literature": ["Julius Caesar (Act 3, 4, 5)", "Treasure Chest: Prose Stories", "Treasure Chest: Poems"]
+    // Built-in Question Bank
+    const questionBank = {
+        "Physics": [
+            {
+                q: "What is the SI unit of work?",
+                options: ["Newton", "Joule", "Watt", "Pascal"],
+                answer: 1
+            },
+            {
+                q: "Which light color suffers maximum deviation when passing through a prism?",
+                options: ["Red", "Yellow", "Violet", "Green"],
+                answer: 2
+            },
+            {
+                q: "The moment of force depends on which two factors?",
+                options: ["Force and Time", "Mass and Velocity", "Magnitude of Force and Perpendicular Distance", "Work and Power"],
+                answer: 2
+            },
+            {
+                q: "What is the refractive index of water?",
+                options: ["1.33", "1.50", "2.42", "1.00"],
+                answer: 0
+            },
+            {
+                q: "The fuse wire is always connected in which wire?",
+                options: ["Neutral wire", "Earth wire", "Live wire", "Any wire"],
+                answer: 2
+            }
+        ],
+        "Chemistry": [
+            {
+                q: "Which element has the highest electronegativity in the periodic table?",
+                options: ["Chlorine", "Oxygen", "Fluorine", "Nitrogen"],
+                answer: 2
+            },
+            {
+                q: "What type of bond is present in a Sodium Chloride (NaCl) molecule?",
+                options: ["Covalent bond", "Ionic / Electrovalent bond", "Coordinate bond", "Metallic bond"],
+                answer: 1
+            },
+            {
+                q: "Which gas is evolved when dilute hydrochloric acid reacts with zinc powder?",
+                options: ["Oxygen", "Carbon dioxide", "Hydrogen", "Chlorine"],
+                answer: 2
+            },
+            {
+                q: "What is the common name for hydrated copper sulfate (CuSO4·5H2O)?",
+                options: ["Green Vitriol", "Blue Vitriol", "White Vitriol", "Baking Soda"],
+                answer: 1
+            },
+            {
+                q: "Which catalyst is used in the Contact Process for manufacturing sulfuric acid?",
+                options: ["Finely divided Iron", "Platinum wire mesh", "Vanadium pentoxide (V2O5)", "Nickel"],
+                answer: 2
+            }
+        ],
+        "Biology": [
+            {
+                q: "Where does light-dependent phase of photosynthesis occur inside the chloroplast?",
+                options: ["Stroma", "Thylakoid / Grana", "Outer membrane", "Ribosomes"],
+                answer: 1
+            },
+            {
+                q: "Which hormone is responsible for cell elongation in plants?",
+                options: ["Auxin", "Abscisic Acid", "Ethylene", "Cytokinin"],
+                answer: 0
+            },
+            {
+                q: "What is the functional unit of the human kidney?",
+                options: ["Neuron", "Nephron", "Alveoli", "Tubule"],
+                answer: 1
+            },
+            {
+                q: "The loss of water in the form of droplets from uninjured margins of leaves is called:",
+                options: ["Transpiration", "Evaporation", "Guttation", "Bleeding"],
+                answer: 2
+            },
+            {
+                q: "Which blood group is known as the universal donor?",
+                options: ["AB positive", "O negative", "A positive", "B negative"],
+                answer: 1
+            }
+        ],
+        "Computer Applications": [
+            {
+                q: "Which keyword is used to allocate memory for an object in Java?",
+                options: ["class", "new", "import", "public"],
+                answer: 1
+            },
+            {
+                q: "What is the return type of the method `isLetter()` in Java?",
+                options: ["int", "char", "boolean", "String"],
+                answer: 2
+            },
+            {
+                q: "Which access specifier makes class members accessible only within the same class?",
+                options: ["public", "protected", "private", "default"],
+                answer: 2
+            },
+            {
+                q: "What will `Math.ceil(4.2)` return in Java?",
+                options: ["4.0", "5.0", "4", "5"],
+                answer: 1
+            },
+            {
+                q: "What is the default initial value of an uninitialized `int` array element?",
+                options: ["null", "-1", "0", "undefined"],
+                answer: 2
+            }
+        ]
     };
 
-    let currentQuizData = [];
+    let currentQuestions = [];
     let currentQuestionIndex = 0;
     let score = 0;
-    let userAnswers = [];
 
-    function loadChapters() {
-        const subjectSelect = document.getElementById('subject-select');
-        const chapterSelect = document.getElementById('chapter-select');
-        const selectedSubject = subjectSelect.value;
-
-        chapterSelect.innerHTML = '<option value="">-- Choose Chapter --</option>';
-
-        if (selectedSubject && icseSyllabus[selectedSubject]) {
-            chapterSelect.disabled = false;
-            icseSyllabus[selectedSubject].forEach(chapter => {
-                const opt = document.createElement('option');
-                opt.value = chapter;
-                opt.textContent = chapter;
-                chapterSelect.appendChild(opt);
-            });
-        } else {
-            chapterSelect.disabled = true;
-        }
-    }
-
-    function generateMockQuiz() {
+    function startQuiz() {
         const subject = document.getElementById('subject-select').value;
-        const chapter = document.getElementById('chapter-select').value;
-        const count = parseInt(document.getElementById('count-select').value, 10);
-
-        if (!subject || !chapter) {
-            alert("Please select both a subject and a chapter.");
+        if (!subject) {
+            alert("Please select a subject first.");
             return;
         }
 
-        const loader = document.getElementById('loading-spinner');
-        loader.style.display = 'block';
+        currentQuestions = questionBank[subject];
+        currentQuestionIndex = 0;
+        score = 0;
 
-        setTimeout(() => {
-            currentQuizData = [];
-            for (let i = 1; i <= count; i++) {
-                currentQuizData.push({
-                    q: `[${subject} - ${chapter}] Sample Board Practice Question ${i}: Identify the correct statement regarding key concepts of this section.`,
-                    options: [
-                        `Option A: Primary principle governing ${chapter} (Correct Answer)`,
-                        `Option B: Secondary alternative variable theory`,
-                        `Option C: Inversely related boundary state`,
-                        `Option D: Non-applicable static condition`
-                    ],
-                    answer: 0,
-                    subtopic: `${chapter} Core Concept Part ${i}`
-                });
-            }
+        document.getElementById('setup-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
+        document.getElementById('quiz-title').textContent = subject;
 
-            currentQuestionIndex = 0;
-            score = 0;
-            userAnswers = [];
-
-            loader.style.display = 'none';
-            document.getElementById('setup-screen').classList.add('hidden');
-            document.getElementById('quiz-screen').classList.remove('hidden');
-            document.getElementById('quiz-chapter-title').textContent = `${subject} → ${chapter}`;
-
-            renderQuestion();
-        }, 500);
+        renderQuestion();
     }
 
     function renderQuestion() {
-        const qData = currentQuizData[currentQuestionIndex];
-        document.getElementById('question-progress').textContent = `Question ${currentQuestionIndex + 1}/${currentQuizData.length}`;
+        const qData = currentQuestions[currentQuestionIndex];
+        document.getElementById('question-progress').textContent = `Question ${currentQuestionIndex + 1}/${currentQuestions.length}`;
         document.getElementById('question-text').textContent = qData.q;
 
         const optionsContainer = document.getElementById('options-container');
@@ -231,25 +239,24 @@
 
         const nextBtn = document.getElementById('next-btn');
         nextBtn.disabled = true;
-        nextBtn.textContent = (currentQuestionIndex === currentQuizData.length - 1) ? "Finish Test" : "Next Question";
+        nextBtn.textContent = (currentQuestionIndex === currentQuestions.length - 1) ? "Finish Test" : "Next Question";
 
         qData.options.forEach((optText, idx) => {
             const btn = document.createElement('button');
             btn.className = 'option-btn';
-            btn.textContent = `${optText}`;
+            btn.textContent = `${String.fromCharCode(65 + idx)}. ${optText}`;
             btn.onclick = () => selectOption(idx);
             optionsContainer.appendChild(btn);
         });
     }
 
     function selectOption(selectedIndex) {
-        const qData = currentQuizData[currentQuestionIndex];
+        const qData = currentQuestions[currentQuestionIndex];
         const options = document.querySelectorAll('.option-btn');
         
         options.forEach(btn => btn.style.pointerEvents = 'none');
 
-        const isCorrect = (selectedIndex === qData.answer);
-        if (isCorrect) {
+        if (selectedIndex === qData.answer) {
             options[selectedIndex].classList.add('correct');
             score++;
         } else {
@@ -257,17 +264,12 @@
             options[qData.answer].classList.add('correct');
         }
 
-        userAnswers.push({
-            subtopic: qData.subtopic || "Chapter Concept",
-            correct: isCorrect
-        });
-
         document.getElementById('next-btn').disabled = false;
     }
 
     function nextQuestion() {
         currentQuestionIndex++;
-        if (currentQuestionIndex < currentQuizData.length) {
+        if (currentQuestionIndex < currentQuestions.length) {
             renderQuestion();
         } else {
             showResults();
@@ -278,40 +280,17 @@
         document.getElementById('quiz-screen').classList.add('hidden');
         document.getElementById('results-screen').classList.remove('hidden');
 
-        const total = currentQuizData.length;
+        const total = currentQuestions.length;
         const percentage = Math.round((score / total) * 100);
 
         document.getElementById('final-score').textContent = `${score} / ${total}`;
         document.getElementById('percentage-label').textContent = `${percentage}% Accuracy`;
-
-        const strengthsList = document.getElementById('strengths-list');
-        const growthList = document.getElementById('growth-list');
-        strengthsList.innerHTML = '';
-        growthList.innerHTML = '';
-
-        userAnswers.forEach(ans => {
-            const li = document.createElement('li');
-            li.textContent = ans.subtopic;
-            if (ans.correct) {
-                strengthsList.appendChild(li);
-            } else {
-                growthList.appendChild(li);
-            }
-        });
-
-        if (!strengthsList.children.length) {
-            strengthsList.innerHTML = '<li>Review chapter concepts to build topic strength.</li>';
-        }
-        if (!growthList.children.length) {
-            growthList.innerHTML = '<li>Perfect score! All subtopics mastered in this test.</li>';
-        }
     }
 
     function resetApp() {
         document.getElementById('results-screen').classList.add('hidden');
         document.getElementById('setup-screen').classList.remove('hidden');
         document.getElementById('subject-select').value = '';
-        loadChapters();
     }
 </script>
 
