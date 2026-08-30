@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICSE Class 10 AI Test Generator</title>
+    <title>ICSE Class 10 Interactive Quiz Portal</title>
     <style>
         :root {
             --primary: #4f46e5;
@@ -98,8 +98,8 @@
             </select>
         </div>
 
-        <button onclick="generateAIQuiz()">Generate & Start Test</button>
-        <div id="loading-spinner" class="loader">Generating fresh ICSE Board questions... Please wait.</div>
+        <button onclick="generateMockQuiz()">Generate & Start Test</button>
+        <div id="loading-spinner" class="loader">Loading ICSE Board questions... Please wait.</div>
     </div>
 
     <!-- QUIZ INTERFACE -->
@@ -142,115 +142,16 @@
 </div>
 
 <script>
-    // Connected Worker Endpoint
-    const WORKER_URL = "https://polished-bread-c7a1.articdas801.workers.dev";
-
     const icseSyllabus = {
-        "Physics": [
-            "Force, Work, Power and Energy",
-            "Refraction of Light & Lenses",
-            "Spectrum",
-            "Sound",
-            "Current Electricity",
-            "Household Circuits",
-            "Electromagnetism",
-            "Calorimetry",
-            "Radioactivity"
-        ],
-        "Chemistry": [
-            "Periodic Properties and Variations",
-            "Chemical Bonding",
-            "Acids, Bases and Salts",
-            "Analytical Chemistry",
-            "Mole Concept and Stoichiometry",
-            "Electrolysis",
-            "Metallurgy",
-            "Study of Compounds: Hydrogen Chloride",
-            "Study of Compounds: Ammonia",
-            "Study of Compounds: Nitric Acid",
-            "Study of Compounds: Sulfuric Acid",
-            "Organic Chemistry"
-        ],
-        "Biology": [
-            "Structure of Chromosomes & Cell Division",
-            "Genetics",
-            "Absorption by Roots",
-            "Transpiration",
-            "Photosynthesis",
-            "Chemical Coordination in Plants",
-            "Circulatory System",
-            "Excretory System",
-            "Nervous System & Sense Organs",
-            "Endocrine System",
-            "Reproductive System",
-            "Population & Pollution"
-        ],
-        "Mathematics": [
-            "Commercial Math (GST, Banking, Shares)",
-            "Linear Inequations",
-            "Quadratic Equations",
-            "Factor Theorem & Polynomials",
-            "Ratio and Proportion",
-            "Matrices",
-            "Arithmetic & Geometric Progression",
-            "Coordinate Geometry",
-            "Similarity of Triangles",
-            "Circles & Tangents",
-            "Mensuration",
-            "Trigonometry",
-            "Statistics",
-            "Probability"
-        ],
-        "Computer Applications": [
-            "Revision of Class 9 Java Concepts",
-            "Library & Wrapper Classes",
-            "Arrays (1D and 2D)",
-            "User-Defined Methods",
-            "Constructors",
-            "String Handling in Java"
-        ],
-        "Geography": [
-            "Interpretation of Topographical Maps",
-            "Map of India",
-            "Location & Physical Features",
-            "Climate of India",
-            "Soil Resources",
-            "Natural Vegetation",
-            "Water Resources",
-            "Mineral and Energy Resources",
-            "Agriculture in India",
-            "Manufacturing Industries",
-            "Transport",
-            "Waste Management"
-        ],
-        "History & Civics": [
-            "Union Legislature (Lok Sabha & Rajya Sabha)",
-            "Union Executive (President, VP & Cabinet)",
-            "Judiciary (Supreme Court & High Court)",
-            "First War of Independence (1857)",
-            "Growth of Nationalism",
-            "First Phase of National Movement",
-            "Second Phase of National Movement",
-            "Mass Phase & Mahatma Gandhi",
-            "Forward Bloc & INA",
-            "Independence & Partition of India",
-            "World Wars (First & Second)",
-            "Fascism & Nazism",
-            "United Nations & Agencies",
-            "Non-Aligned Movement"
-        ],
-        "English Language": [
-            "Composition Writing",
-            "Letter Writing (Formal & Informal)",
-            "Notice & Email Writing",
-            "Comprehension Passages",
-            "Applied Grammar & Transformations"
-        ],
-        "English Literature": [
-            "Julius Caesar (Act 3, 4, 5)",
-            "Treasure Chest: Prose Stories",
-            "Treasure Chest: Poems"
-        ]
+        "Physics": ["Force, Work, Power and Energy", "Refraction of Light & Lenses", "Spectrum", "Sound", "Current Electricity", "Household Circuits", "Electromagnetism", "Calorimetry", "Radioactivity"],
+        "Chemistry": ["Periodic Properties and Variations", "Chemical Bonding", "Acids, Bases and Salts", "Analytical Chemistry", "Mole Concept and Stoichiometry", "Electrolysis", "Metallurgy", "Organic Chemistry"],
+        "Biology": ["Structure of Chromosomes & Cell Division", "Genetics", "Absorption by Roots", "Transpiration", "Photosynthesis", "Circulatory System", "Excretory System", "Nervous System & Sense Organs"],
+        "Mathematics": ["Commercial Math", "Linear Inequations", "Quadratic Equations", "Ratio and Proportion", "Matrices", "Arithmetic & Geometric Progression", "Coordinate Geometry", "Trigonometry"],
+        "Computer Applications": ["Revision of Class 9 Java Concepts", "Library & Wrapper Classes", "Arrays (1D and 2D)", "User-Defined Methods", "Constructors", "String Handling in Java"],
+        "Geography": ["Interpretation of Topographical Maps", "Climate of India", "Soil Resources", "Natural Vegetation", "Water Resources", "Agriculture in India"],
+        "History & Civics": ["Union Legislature", "Union Executive", "Judiciary", "First War of Independence (1857)", "Growth of Nationalism", "Mass Phase & Mahatma Gandhi"],
+        "English Language": ["Composition Writing", "Letter Writing", "Notice & Email Writing", "Comprehension Passages", "Applied Grammar"],
+        "English Literature": ["Julius Caesar (Act 3, 4, 5)", "Treasure Chest: Prose Stories", "Treasure Chest: Poems"]
     };
 
     let currentQuizData = [];
@@ -278,10 +179,10 @@
         }
     }
 
-    async function generateAIQuiz() {
+    function generateMockQuiz() {
         const subject = document.getElementById('subject-select').value;
         const chapter = document.getElementById('chapter-select').value;
-        const count = document.getElementById('count-select').value;
+        const count = parseInt(document.getElementById('count-select').value, 10);
 
         if (!subject || !chapter) {
             alert("Please select both a subject and a chapter.");
@@ -291,25 +192,22 @@
         const loader = document.getElementById('loading-spinner');
         loader.style.display = 'block';
 
-        const prompt = `Generate exactly ${count} unique, creative, non-repetitive multiple-choice questions for ICSE Class 10 on the subject "${subject}" and chapter "${chapter}". Format the output strictly as a JSON array of objects with keys: "q" (question string), "options" (array of 4 option strings), "answer" (0-based index of correct option), and "subtopic" (string topic tag). Do not output markdown code blocks or extra text, just raw JSON.`;
-
-        try {
-            const response = await fetch(WORKER_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: prompt })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || "Server error.");
+        setTimeout(() => {
+            currentQuizData = [];
+            for (let i = 1; i <= count; i++) {
+                currentQuizData.push({
+                    q: `[${subject} - ${chapter}] Sample Board Practice Question ${i}: Identify the correct statement regarding key concepts of this section.`,
+                    options: [
+                        `Option A: Primary principle governing ${chapter} (Correct Answer)`,
+                        `Option B: Secondary alternative variable theory`,
+                        `Option C: Inversely related boundary state`,
+                        `Option D: Non-applicable static condition`
+                    ],
+                    answer: 0,
+                    subtopic: `${chapter} Core Concept Part ${i}`
+                });
             }
 
-            const data = await response.json();
-            let rawText = data.candidates[0].content.parts[0].text;
-            rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-            
-            currentQuizData = JSON.parse(rawText);
             currentQuestionIndex = 0;
             score = 0;
             userAnswers = [];
@@ -320,11 +218,7 @@
             document.getElementById('quiz-chapter-title').textContent = `${subject} → ${chapter}`;
 
             renderQuestion();
-        } catch (error) {
-            loader.style.display = 'none';
-            alert("Error generating questions: " + error.message);
-            console.error(error);
-        }
+        }, 500);
     }
 
     function renderQuestion() {
@@ -342,7 +236,7 @@
         qData.options.forEach((optText, idx) => {
             const btn = document.createElement('button');
             btn.className = 'option-btn';
-            btn.textContent = `${String.fromCharCode(65 + idx)}. ${optText}`;
+            btn.textContent = `${optText}`;
             btn.onclick = () => selectOption(idx);
             optionsContainer.appendChild(btn);
         });
