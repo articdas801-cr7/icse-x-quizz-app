@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICSE Class 10 Interactive Quiz Portal</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --border: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
+        .container { width: 100%; max-width: 800px; background: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); padding: 32px; height: fit-content; }
+        
+        .hidden { display: none !important; }
+        h1, h2, h3 { color: var(--text); margin-bottom: 16px; }
+        p { color: var(--text-muted); margin-bottom: 24px; }
+
+        /* Form elements */
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+        select, button { width: 100%; padding: 12px 16px; border-radius: 8px; font-size: 16px; transition: all 0.2s; }
+        select { border: 1px solid var(--border); background-color: #fff; outline: none; }
+        select:focus { border-color: var(--primary); }
+        
+        button { background-color: var(--primary); color: white; border: none; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        button:hover { background-color: var(--primary-hover); }
+
+        /* Quiz UI */
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+        .options-grid { display: grid; gap: 12px; margin: 20px 0; }
+        .option-btn { background: white; border: 2px solid var(--border); color: var(--text); text-align: left; }
+        .option-btn:hover { border-color: var(--primary); background-color: #f0fdf4; }
+        .option-btn.selected { border-color: var(--primary); background-color: #eef2ff; }
+        .option-btn.correct { border-color: var(--success); background-color: #f0fdf4; color: #15803d; }
+        .option-btn.incorrect { border-color: var(--danger); background-color: #fef2f2; color: #b91c1c; }
+
+        /* Dashboard UI */
+        .score-card { background: #eef2ff; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px; }
+        .score-num { font-size: 48px; font-weight: 800; color: var(--primary); }
+        .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .analytic-box { padding: 16px; border-radius: 8px; border: 1px solid var(--border); }
+        .analytic-box.strengths { background-color: #f0fdf4; border-color: #bbf7d0; }
+        .analytic-box.growth { background-color: #fff7ed; border-color: #fed7aa; }
+        .analytic-box h4 { margin-bottom: 8px; }
+        .analytic-box ul { padding-left: 20px; font-size: 14px; color: var(--text); }
+
+        @media (max-width: 600px) {
+            .analytics-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="setup-screen">
+        <h1>ICSE Class 10 Practice Portal</h1>
+        <p>Select your subject and target chapter to begin testing your knowledge.</p>
+        
+        <div class="form-group">
+            <label for="subject-select">Select Subject</label>
+            <select id="subject-select" onchange="loadChapters()">
+                <option value="">-- Choose Subject --</option>
+                <option value="biology">Biology</option>
+                <option value="physics">Physics</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="chapter-select">Select Chapter</label>
+            <select id="chapter-select" disabled>
+                <option value="">-- Choose Subject First --</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="count-select">Number of Questions</label>
+            <select id="count-select">
+                <option value="3">3 Questions (Quick Practice)</option>
+                <option value="5">5 Questions (Standard)</option>
+            </select>
+        </div>
+
+        <button onclick="startQuiz()">Start Quiz</button>
+    </div>
+
+    <div id="quiz-screen" class="hidden">
+        <div class="quiz-header">
+            <span id="quiz-chapter-title" style="font-weight: 600;">Chapter</span>
+            <span id="question-progress">Question 1/5</span>
+        </div>
+        
+        <h2 id="question-text">Question content goes here?</h2>
+        <div class="options-grid" id="options-container"></div>
+        
+        <button id="next-btn" onclick="nextQuestion()" disabled>Select an Answer</button>
+    </div>
+
+    <div id="results-screen" class="hidden">
+        <h2>Performance Report</h2>
+        <p>Here is your detailed breakdown for this session.</p>
+
+        <div class="score-card">
+            <div>Total Score</div>
+            <div class="score-num" id="final-score">0 / 0</div>
+            <div id="percentage-label" style="font-weight: 600; color: var(--text-muted);">0%</div>
+        </div>
+
+        <div class="analytics-grid">
+            <div class="analytic-box strengths">
+                <h4 style="color: #166534;">💪 Strengths</h4>
+                <ul id="strengths-list"></ul>
+            </div>
+            <div class="analytic-box growth">
+                <h4 style="color: #9a3412;">📈 Focus & Growth Areas</h4>
+                <ul id="growth-list"></ul>
+            </div>
+        </div>
+
+        <button onclick="resetApp()">Take Another Quiz</button>
+    </div>
+</div>
+
+<script>
+    // ICSE Class 10 Syllabus Database
+    const syllabus = {
+        biology: {
+            "Control and Coordination": [
+                {
+                    q: "Which part of the neuron receives chemical signals from another neuron?",
+                    options: ["Axon terminal", "Dendrite", "Myelin sheath", "Node of Ranvier"],
+                    answer: 1,
+                    subtopic: "Neuron Anatomy"
+                },
+                {
+                    q: "Which hormone regulates blood sugar levels by aiding glucose uptake?",
+                    options: ["Glucagon", "Thyroxin", "Insulin", "Adrenaline"],
+                    answer: 2,
+                    subtopic: "Endocrine System"
+                },
+                {
+                    q: "Which part of the brain controls voluntary actions like balancing a bicycle?",
+                    options: ["Cerebrum", "Cerebellum", "Medulla Oblongata", "Pons"],
+                    answer: 1,
+                    subtopic: "Brain Functions"
+                }
+            ],
+            "Chemical Coordination in Plants": [
+                {
+                    q: "Which plant hormone promotes cell elongation on the shaded side of a stem?",
+                    options: ["Abscisic Acid", "Auxin", "Cytokinin", "Ethylene"],
+                    answer: 1,
+                    subtopic: "Phytohormones"
+                },
+                {
+                    q: "The response of plant roots growing towards gravity is known as:",
+                    options: ["Positive Phototropism", "Negative Geotropism", "Positive Geotropism", "Hydrotropism"],
+                    answer: 2,
+                    subtopic: "Tropic Movements"
+                }
+            ]
+        },
+        physics: {
+            "Force, Work, Power and Energy": [
+                {
+                    q: "The SI unit of work done is:",
+                    options: ["Newton", "Joule", "Watt", "Pascal"],
+                    answer: 1,
+                    subtopic: "Units & Measurements"
+                },
+                {
+                    q: "If the velocity of a body is doubled, its kinetic energy becomes:",
+                    options: ["Doubled", "Half", "Four times", "Unchanged"],
+                    answer: 2,
+                    subtopic: "Kinetic Energy Relations"
+                }
+            ],
+            "Refraction of Light": [
+                {
+                    q: "When light travels from a denser medium to a rarer medium, it bends:",
+                    options: ["Towards the normal", "Away from the normal", "Un-deviated", "Reflects back entirely always"],
+                    answer: 1,
+                    subtopic: "Laws of Refraction"
+                }
+            ]
+        }
+    };
+
+    // Application State Variables
+    let currentQuizData = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let userAnswers = [];
+
+    function loadChapters() {
+        const subjectSelect = document.getElementById('subject-select');
+        const chapterSelect = document.getElementById('chapter-select');
+        const selectedSubject = subjectSelect.value;
+
+        chapterSelect.innerHTML = '<option value="">-- Choose Chapter --</option>';
+
+        if (selectedSubject && syllabus[selectedSubject]) {
+            chapterSelect.disabled = false;
+            Object.keys(syllabus[selectedSubject]).forEach(chapter => {
+                const opt = document.createElement('option');
+                opt.value = chapter;
+                opt.textContent = chapter;
+                chapterSelect.appendChild(opt);
+            });
+        } else {
+            chapterSelect.disabled = true;
+        }
+    }
+
+    function startQuiz() {
+        const subject = document.getElementById('subject-select').value;
+        const chapter = document.getElementById('chapter-select').value;
+        const count = parseInt(document.getElementById('count-select').value);
+
+        if (!subject || !chapter) {
+            alert("Please select both a subject and a chapter.");
+            return;
+        }
+
+        // Fetch questions for selection
+        const allQuestions = syllabus[subject][chapter];
+        currentQuizData = allQuestions.slice(0, count);
+        currentQuestionIndex = 0;
+        score = 0;
+        userAnswers = [];
+
+        // UI Transition
+        document.getElementById('setup-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
+        document.getElementById('quiz-chapter-title').textContent = chapter;
+
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        const qData = currentQuizData[currentQuestionIndex];
+        document.getElementById('question-progress').textContent = `Question ${currentQuestionIndex + 1}/${currentQuizData.length}`;
+        document.getElementById('question-text').textContent = qData.q;
+
+        const optionsContainer = document.getElementById('options-container');
+        optionsContainer.innerHTML = '';
+
+        const nextBtn = document.getElementById('next-btn');
+        nextBtn.disabled = true;
+        nextBtn.textContent = (currentQuestionIndex === currentQuizData.length - 1) ? "Finish Quiz" : "Next Question";
+
+        qData.options.forEach((optText, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.textContent = `${String.fromCharCode(65 + idx)}. ${optText}`;
+            btn.onclick = () => selectOption(idx);
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    function selectOption(selectedIndex) {
+        const qData = currentQuizData[currentQuestionIndex];
+        const options = document.querySelectorAll('.option-btn');
+        
+        // Lock options after selection
+        options.forEach(btn => btn.style.pointerEvents = 'none');
+
+        const isCorrect = (selectedIndex === qData.answer);
+        if (isCorrect) {
+            options[selectedIndex].classList.add('correct');
+            score++;
+        } else {
+            options[selectedIndex].classList.add('incorrect');
+            options[qData.answer].classList.add('correct');
+        }
+
+        userAnswers.push({
+            subtopic: qData.subtopic,
+            correct: isCorrect
+        });
+
+        document.getElementById('next-btn').disabled = false;
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < currentQuizData.length) {
+            renderQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('results-screen').classList.remove('hidden');
+
+        const total = currentQuizData.length;
+        const percentage = Math.round((score / total) * 100);
+
+        document.getElementById('final-score').textContent = `${score} / ${total}`;
+        document.getElementById('percentage-label').textContent = `${percentage}% Accuracy`;
+
+        // Process Strengths & Focus Areas
+        const strengthsList = document.getElementById('strengths-list');
+        const growthList = document.getElementById('growth-list');
+        strengthsList.innerHTML = '';
+        growthList.innerHTML = '';
+
+        userAnswers.forEach(ans => {
+            const li = document.createElement('li');
+            li.textContent = ans.subtopic;
+            if (ans.correct) {
+                strengthsList.appendChild(li);
+            } else {
+                growthList.appendChild(li);
+            }
+        });
+
+        if (!strengthsList.children.length) {
+            strengthsList.innerHTML = '<li>Keep practicing to build topic strengths!</li>';
+        }
+        if (!growthList.children.length) {
+            growthList.innerHTML = '<li>Perfect score! No specific growth area needed.</li>';
+        }
+    }
+
+    function resetApp() {
+        document.getElementById('results-screen').classList.add('hidden');
+        document.getElementById('setup-screen').classList.remove('hidden');
+        document.getElementById('subject-select').value = '';
+        loadChapters();
+    }
+</script>
+
+</body>
+</html>
