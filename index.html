@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICSE Class 10 (2027 Syllabus) Practice Portal</title>
+    <title>ICSE Class 10 Infinite AI Test Generator</title>
     <style>
         :root {
             --primary: #4f46e5;
@@ -34,13 +34,15 @@
         button { background-color: var(--primary); color: white; border: none; font-weight: 600; cursor: pointer; margin-top: 10px; }
         button:hover { background-color: var(--primary-hover); }
 
+        .loader { display: none; text-align: center; margin: 20px 0; font-weight: 600; color: var(--primary); }
+
         .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
         .options-grid { display: grid; gap: 12px; margin: 20px 0; }
-        .option-btn { background: white; border: 2px solid var(--border); color: var(--text); text-align: left; }
+        .option-btn { background: white; border: 2px solid var(--border); color: var(--text); text-align: left; line-height: 1.4; }
         .option-btn:hover { border-color: var(--primary); background-color: #f0fdf4; }
         .option-btn.selected { border-color: var(--primary); background-color: #eef2ff; }
-        .option-btn.correct { border-color: var(--success); background-color: #f0fdf4; color: #15803d; }
-        .option-btn.incorrect { border-color: var(--danger); background-color: #fef2f2; color: #b91c1c; }
+        .option-btn.correct { border-color: var(--success); background-color: #f0fdf4; color: #15803d; font-weight: 600; }
+        .option-btn.incorrect { border-color: var(--danger); background-color: #fef2f2; color: #b91c1c; font-weight: 600; }
 
         .score-card { background: #eef2ff; padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px; }
         .score-num { font-size: 48px; font-weight: 800; color: var(--primary); }
@@ -61,8 +63,8 @@
 <div class="container">
     <!-- SETUP SCREEN -->
     <div id="setup-screen">
-        <h1>ICSE Class 10 (2027) Practice Portal</h1>
-        <p>Comprehensive preparation portal across all 9 subjects based on the ICSE 2027 curriculum.</p>
+        <h1>ICSE Class 10 Interactive Quiz Portal</h1>
+        <p>Select your subject and chapter to generate live, non-repetitive board-level practice questions.</p>
         
         <div class="form-group">
             <label for="subject-select">Select Subject</label>
@@ -90,13 +92,15 @@
         <div class="form-group">
             <label for="count-select">Number of Questions</label>
             <select id="count-select">
-                <option value="3">3 Questions (Quick Practice)</option>
-                <option value="5">5 Questions (Standard Test)</option>
-                <option value="10">10 Questions (Full Assessment)</option>
+                <option value="5">5 Questions (Quick Test)</option>
+                <option value="10">10 Questions (Standard Test)</option>
+                <option value="15">15 Questions (Extended Practice)</option>
+                <option value="30">30 Questions (Full Mock Board Exam)</option>
             </select>
         </div>
 
-        <button onclick="startQuiz()">Start Practice Test</button>
+        <button onclick="generateAIQuiz()">Generate & Start Test</button>
+        <div id="loading-spinner" class="loader">Generating fresh ICSE Board questions... Please wait.</div>
     </div>
 
     <!-- QUIZ INTERFACE -->
@@ -114,11 +118,11 @@
 
     <!-- ANALYTICS DASHBOARD -->
     <div id="results-screen" class="hidden">
-        <h2>Performance & Diagnostics Report</h2>
-        <p>Comprehensive assessment results for your chosen module.</p>
+        <h2>Performance & Diagnostic Report</h2>
+        <p>Comprehensive evaluation of your session performance.</p>
 
         <div class="score-card">
-            <div>Total Marks</div>
+            <div>Total Score</div>
             <div class="score-num" id="final-score">0 / 0</div>
             <div id="percentage-label" style="font-weight: 600; color: var(--text-muted);">0%</div>
         </div>
@@ -134,103 +138,24 @@
             </div>
         </div>
 
-        <button onclick="resetApp()">Practice Another Chapter</button>
+        <button onclick="resetApp()">Generate New Quiz</button>
     </div>
 </div>
 
 <script>
-    // Comprehensive ICSE Class 10 (2027 Syllabus) Subject & Chapter Database
+    // Embedded API Key
+    const EMBEDDED_API_KEY = "AIzaSy" + "ORsA";
+
     const icseSyllabus2027 = {
-        "Physics": [
-            "Force, Work, Power and Energy",
-            "Light (Refraction, Lenses, Spectrum)",
-            "Sound",
-            "Current Electricity & Household Circuits",
-            "Electromagnetism",
-            "Calorimetry",
-            "Radioactivity"
-        ],
-        "Chemistry": [
-            "Periodic Properties and Variations",
-            "Chemical Bonding",
-            "Study of Acids, Bases and Salts",
-            "Analytical Chemistry",
-            "Mole Concept and Stoichiometry",
-            "Electrolysis",
-            "Metallurgy",
-            "Study of Compounds (HCl, NH3, HNO3, H2SO4)",
-            "Organic Chemistry"
-        ],
-        "Biology": [
-            "Cell Cycle, Cell Division and Structure of Chromosomes",
-            "Genetics - Some Basic Fundamentals",
-            "Absorption by Roots",
-            "Transpiration",
-            "Photosynthesis",
-            "Chemical Coordination in Plants",
-            "Circulatory System",
-            "Excretory System",
-            "Nervous System & Sense Organs",
-            "Endocrine System",
-            "Reproductive System",
-            "Human Population & Pollution"
-        ],
-        "Mathematics": [
-            "Commercial Mathematics (GST, Banking, Shares & Dividends)",
-            "Algebra (Linear Inequations, Quadratic Equations, Factor Theorem, Ratio & Proportion, Matrices, Arithmetic & Geometric Progression)",
-            "Coordinate Geometry (Reflection, Section & Mid-Point Formula, Equation of a Line)",
-            "Geometry (Similarity, Circles - Angle and Cyclic Properties, Tangents)",
-            "Mensuration (Cylinder, Cone, Sphere)",
-            "Trigonometry (Identities, Heights and Distances)",
-            "Statistics (Mean, Median, Mode, Ogive)",
-            "Probability"
-        ],
-        "Computer Applications": [
-            "Revision of Class 9 Java Concepts",
-            "Library Classes & Wrapper Classes",
-            "Arrays (Single Dimensional and Double Dimensional)",
-            "User-Defined Methods (Overloading, Parameter Passing)",
-            "Class as the Basis of all Computation (Constructors)",
-            "String Handling in Java"
-        ],
-        "Geography": [
-            "Interpretation of Topographical Maps",
-            "Map of India",
-            "Location, Extent and Physical Features of India",
-            "Climate of India",
-            "Soil Resources",
-            "Natural Vegetation",
-            "Water Resources",
-            "Mineral and Energy Resources",
-            "Agriculture in India",
-            "Manufacturing Industries",
-            "Transport Infrastructure",
-            "Waste Management"
-        ],
-        "History & Civics": [
-            "Civics: The Union Legislature (Lok Sabha & Rajya Sabha)",
-            "Civics: The Union Executive (President, Vice-President, Prime Minister & Cabinet)",
-            "Civics: The Judiciary (Supreme Court & High Courts)",
-            "History: The First War of Independence (1857)",
-            "History: Growth of Nationalism & Early Nationalists",
-            "History: The National Movement & Mass Phase (1915-1947)",
-            "History: Forward Bloc, INA & Partition",
-            "History: The First and Second World Wars",
-            "History: Rise of Dictatorships (Fascism & Nazism)",
-            "History: The United Nations & Non-Aligned Movement (NAM)"
-        ],
-        "English Language": [
-            "Composition / Essay Writing",
-            "Formal & Informal Letter Writing",
-            "Notice and Email Writing",
-            "Unseen Passage / Reading Comprehension",
-            "Applied Grammar (Transformation of Sentences, Prepositions, Tenses, Agreement of Verb)"
-        ],
-        "English Literature": [
-            "Drama: Julius Caesar (Act 3, Act 4, Act 5)",
-            "Prose: Treasure Chest - Stories (Ha'penny, With the Photographer, The Elevator, The Girl Who Can, The Pedestrian)",
-            "Poetry: Treasure Chest - Poems (Haunted Houses, The Glove and the Lions, When Great Trees Fall, A Considerable Speck, The Power of Music)"
-        ]
+        "Physics": ["Force, Work, Power and Energy", "Refraction of Light & Lenses", "Spectrum", "Sound", "Current Electricity", "Household Circuits", "Electromagnetism", "Calorimetry", "Radioactivity"],
+        "Chemistry": ["Periodic Properties", "Chemical Bonding", "Acids, Bases and Salts", "Analytical Chemistry", "Mole Concept & Stoichiometry", "Electrolysis", "Metallurgy", "Hydrogen Chloride", "Ammonia", "Nitric Acid", "Sulfuric Acid", "Organic Chemistry"],
+        "Biology": ["Structure of Chromosomes & Cell Division", "Genetics", "Absorption by Roots", "Transpiration", "Photosynthesis", "Chemical Coordination in Plants", "Circulatory System", "Excretory System", "Nervous System & Sense Organs", "Endocrine System", "Reproductive System", "Population & Pollution"],
+        "Mathematics": ["Commercial Math (GST, Banking, Shares)", "Linear Inequations", "Quadratic Equations", "Factor Theorem", "Ratio and Proportion", "Matrices", "Arithmetic & Geometric Progression", "Coordinate Geometry", "Similarity", "Circles & Tangents", "Mensuration", "Trigonometry", "Statistics", "Probability"],
+        "Computer Applications": ["Revision of Class 9 Java", "Library & Wrapper Classes", "Arrays (1D and 2D)", "User-Defined Methods", "Constructors", "String Handling in Java"],
+        "Geography": ["Topographical Maps", "Map of India", "Location & Physical Features", "Climate of India", "Soil Resources", "Natural Vegetation", "Water Resources", "Mineral and Energy Resources", "Agriculture", "Manufacturing Industries", "Transport", "Waste Management"],
+        "History & Civics": ["Union Legislature", "Union Executive", "Judiciary", "First War of Independence (1857)", "Growth of Nationalism", "First Phase of National Movement", "Second Phase of National Movement", "Mass Phase & Mahatma Gandhi", "Forward Bloc & INA", "Independence & Partition", "World Wars", "Fascism & Nazism", "United Nations", "Non-Aligned Movement"],
+        "English Language": ["Composition", "Letter Writing", "Notice & Email Writing", "Comprehension", "Applied Grammar"],
+        "English Literature": ["Julius Caesar (Act 3, 4, 5)", "Treasure Chest Prose", "Treasure Chest Poetry"]
     };
 
     let currentQuizData = [];
@@ -258,45 +183,50 @@
         }
     }
 
-    // Dynamic question generator for 2027 Syllabus across all subjects & chapters
-    function generateQuestionsForChapter(subject, chapter, count) {
-        const questions = [];
-        for (let i = 1; i <= count; i++) {
-            questions.push({
-                q: `[ICSE 2027 Sample Q${i}] Evaluate the core principles of "${chapter}" in ${subject}. Which of the following statements represents the accurate board-level application?`,
-                options: [
-                    `Standard ICSE Application Rule ${i}A for ${chapter}`,
-                    `Correct Board Application Rule for ${chapter} (${subject})`,
-                    `Incorrect Application Rule ${i}C for ${chapter}`,
-                    `Alternative Non-Standard Rule ${i}D`
-                ],
-                answer: 1, // Correct option index
-                subtopic: `${chapter} - Core Concept ${i}`
-            });
-        }
-        return questions;
-    }
-
-    function startQuiz() {
+    async function generateAIQuiz() {
         const subject = document.getElementById('subject-select').value;
         const chapter = document.getElementById('chapter-select').value;
-        const count = parseInt(document.getElementById('count-select').value);
+        const count = document.getElementById('count-select').value;
 
         if (!subject || !chapter) {
             alert("Please select both a subject and a chapter.");
             return;
         }
 
-        currentQuizData = generateQuestionsForChapter(subject, chapter, count);
-        currentQuestionIndex = 0;
-        score = 0;
-        userAnswers = [];
+        const loader = document.getElementById('loading-spinner');
+        loader.style.display = 'block';
 
-        document.getElementById('setup-screen').classList.add('hidden');
-        document.getElementById('quiz-screen').classList.remove('hidden');
-        document.getElementById('quiz-chapter-title').textContent = `${subject} → ${chapter}`;
+        const prompt = `Generate exactly ${count} unique, creative, non-repetitive multiple-choice questions for ICSE Class 10 on the subject "${subject}" and chapter "${chapter}". Format the output strictly as a JSON array of objects with keys: "q" (question string), "options" (array of 4 option strings), "answer" (0-based index of correct option), and "subtopic" (string topic tag). Do not output markdown code blocks or extra text, just raw JSON.`;
 
-        renderQuestion();
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${EMBEDDED_API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
+
+            const data = await response.json();
+            let rawText = data.candidates[0].content.parts[0].text;
+            rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+            
+            currentQuizData = JSON.parse(rawText);
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+
+            loader.style.display = 'none';
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            document.getElementById('quiz-chapter-title').textContent = `${subject} → ${chapter}`;
+
+            renderQuestion();
+        } catch (error) {
+            loader.style.display = 'none';
+            alert("Error generating questions. Please try again.");
+            console.error(error);
+        }
     }
 
     function renderQuestion() {
@@ -336,7 +266,7 @@
         }
 
         userAnswers.push({
-            subtopic: qData.subtopic,
+            subtopic: qData.subtopic || "Chapter Concept",
             correct: isCorrect
         });
 
@@ -360,7 +290,7 @@
         const percentage = Math.round((score / total) * 100);
 
         document.getElementById('final-score').textContent = `${score} / ${total}`;
-        document.getElementById('percentage-label').textContent = `${percentage}% Overall Accuracy`;
+        document.getElementById('percentage-label').textContent = `${percentage}% Accuracy`;
 
         const strengthsList = document.getElementById('strengths-list');
         const growthList = document.getElementById('growth-list');
@@ -378,10 +308,10 @@
         });
 
         if (!strengthsList.children.length) {
-            strengthsList.innerHTML = '<li>Review chapter basics and attempt practice sets again.</li>';
+            strengthsList.innerHTML = '<li>Review chapter concepts to build topic strength.</li>';
         }
         if (!growthList.children.length) {
-            growthList.innerHTML = '<li>Excellent performance! No immediate growth area needed.</li>';
+            growthList.innerHTML = '<li>Perfect score! All subtopics mastered in this test.</li>';
         }
     }
 
