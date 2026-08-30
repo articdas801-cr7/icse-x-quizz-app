@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICSE Class 10 Practice Portal</title>
+    <title>ICSE Class 10 Dynamic Question Generator</title>
     <style>
         :root {
             --primary: #4f46e5;
@@ -60,7 +60,7 @@
 <div class="container">
     <div id="setup-screen">
         <h1>ICSE Class 10 Interactive Quiz Portal</h1>
-        <p>Select your subject, chapter, and test length to begin dynamic board-level practice.</p>
+        <p>Select your subject, chapter, and question count to begin an instant test.</p>
         
         <div class="form-group">
             <label for="subject-select">Select Subject</label>
@@ -86,14 +86,14 @@
         <div class="form-group">
             <label for="count-select">Number of Questions</label>
             <select id="count-select">
-                <option value="5">5 Questions (Quick Test)</option>
-                <option value="10">10 Questions (Standard Test)</option>
+                <option value="5">5 Questions (Quick Practice)</option>
+                <option value="10">10 Questions (Standard Practice)</option>
                 <option value="15">15 Questions (Extended Practice)</option>
-                <option value="30">30 Questions (Full Mock Board Exam)</option>
+                <option value="30">30 Questions (Full Mock Exam)</option>
             </select>
         </div>
 
-        <button onclick="startQuiz()">Start Test</button>
+        <button onclick="startQuiz()">Generate & Start Test</button>
     </div>
 
     <div id="quiz-screen" class="hidden">
@@ -129,68 +129,66 @@
             </div>
         </div>
 
-        <button onclick="resetApp()">Generate New Quiz</button>
+        <button onclick="resetApp()">Generate New Test</button>
     </div>
 </div>
 
 <script>
     const syllabus = {
-        "Biology": ["Nervous System & Sense Organs", "Chemical Coordination in Plants", "Absorption by Roots", "Photosynthesis", "Circulatory System"],
-        "Physics": ["Force, Work, Power & Energy", "Refraction of Light", "Spectrum", "Current Electricity", "Calorimetry"],
-        "Chemistry": ["Periodic Properties", "Chemical Bonding", "Acids, Bases & Salts", "Electrolysis", "Organic Chemistry"],
-        "Mathematics": ["Commercial Math", "Quadratic Equations", "Matrices", "Trigonometry", "Circles & Tangents"],
-        "Computer Applications": ["String Handling in Java", "User-Defined Methods", "Arrays (1D and 2D)", "Library Classes"],
-        "Geography": ["Climate of India", "Soil Resources", "Natural Vegetation", "Water Resources"],
-        "History & Civics": ["Union Legislature", "Judiciary", "First War of Independence (1857)", "Mass Phase & Gandhi"]
+        "Biology": ["Nervous System & Sense Organs", "Chemical Coordination in Plants", "Absorption by Roots", "Photosynthesis", "Circulatory System", "Genetics"],
+        "Physics": ["Force, Work, Power & Energy", "Refraction of Light", "Spectrum", "Current Electricity", "Calorimetry", "Radioactivity"],
+        "Chemistry": ["Periodic Properties", "Chemical Bonding", "Acids, Bases & Salts", "Electrolysis", "Organic Chemistry", "Mole Concept"],
+        "Mathematics": ["Commercial Math", "Quadratic Equations", "Matrices", "Trigonometry", "Circles & Tangents", "Statistics"],
+        "Computer Applications": ["String Handling in Java", "User-Defined Methods", "Arrays (1D and 2D)", "Library & Wrapper Classes", "Constructors"],
+        "Geography": ["Climate of India", "Soil Resources", "Natural Vegetation", "Water Resources", "Manufacturing Industries"],
+        "History & Civics": ["Union Legislature", "Judiciary", "First War of Independence (1857)", "Mass Phase & Gandhi", "United Nations"]
     };
 
-    const questionTemplates = {
+    const questionPool = {
         "Biology": [
-            { q: "Which part of the neuron receives impulses towards the cell body?", options: ["Dendrite", "Axon", "Myelin sheath", "Synapse"], answer: 0, subtopic: "Neuron Anatomy" },
-            { q: "The center for controlling reflex actions in humans is the:", options: ["Cerebrum", "Cerebellum", "Spinal Cord", "Medulla Oblongata"], answer: 2, subtopic: "Reflex Mechanism" },
-            { q: "Which iris muscles contract to constrict the pupil in bright light?", options: ["Radial muscles", "Circular muscles", "Ciliary muscles", "Suspensory ligaments"], answer: 1, subtopic: "Eye Reflexes" },
-            { q: "Plant shoot curvature toward light is governed by which hormone?", options: ["Gibberellin", "Auxin", "Cytokinin", "Abscisic Acid"], answer: 1, subtopic: "Phototropism" },
-            { q: "Root pressure in plants is developed due to:", options: ["Transpiration pull", "Active absorption", "Passive absorption", "Osmotic pressure"], answer: 1, subtopic: "Root Transport" }
+            { q: "Which unit structural component of the human nervous system conducts electrical impulses away from the cell body?", options: ["Axon", "Dendrite", "Cyton", "Schwann Cell"], answer: 0, subtopic: "Neuron Structure" },
+            { q: "The part of the brain that maintains posture and equilibrium of the body is the:", options: ["Cerebrum", "Cerebellum", "Medulla Oblongata", "Pons"], answer: 1, subtopic: "Brain Function" },
+            { q: "The transparent front part of the eye that refracts light entering the pupil is called the:", options: ["Retina", "Sclera", "Cornea", "Choroid"], answer: 2, subtopic: "Eye Anatomy" },
+            { q: "Which hormone promotes cell division and is found in high concentration in fruits and seeds?", options: ["Auxin", "Gibberellin", "Cytokinin", "Abscisic Acid"], answer: 2, subtopic: "Plant Hormones" },
+            { q: "Root hair cells absorb water from soil primarily through which process?", options: ["Diffusion", "Osmosis", "Active Transport", "Imbibition"], answer: 1, subtopic: "Absorption Mechanisms" },
+            { q: "Which blood vessel carries oxygenated blood from lungs back to the heart?", options: ["Pulmonary Artery", "Pulmonary Vein", "Vena Cava", "Aorta"], answer: 1, subtopic: "Circulatory System" }
         ],
         "Physics": [
-            { q: "If the speed of a moving body is doubled, its kinetic energy becomes:", options: ["2 times", "4 times", "Half", "8 times"], answer: 1, subtopic: "Kinetic Energy" },
-            { q: "The work done by a central force on a body moving in a circular path is:", options: ["Maximum", "Zero", "Negative", "Variable"], answer: 1, subtopic: "Work Calculation" },
-            { q: "A convex lens forms a real image of identical size when the object is at:", options: ["Focus (F)", "At 2F", "Between F and 2F", "Infinity"], answer: 1, subtopic: "Optics Ray Diagrams" },
-            { q: "Which color of white light undergoes maximum deviation through a prism?", options: ["Red", "Yellow", "Violet", "Green"], answer: 2, subtopic: "Dispersion of Light" },
-            { q: "The S.I. unit of specific heat capacity is:", options: ["J kg⁻¹ K⁻¹", "J kg⁻¹", "J K⁻¹", "Calorie"], answer: 0, subtopic: "Calorimetry Units" }
+            { q: "When a body falls freely under gravity, its total mechanical energy:", options: ["Increases", "Decreases", "Remains Constant", "Becomes Zero"], answer: 2, subtopic: "Energy Conservation" },
+            { q: "Refractive index of a glass slab is maximum for which color of light?", options: ["Red", "Green", "Yellow", "Violet"], answer: 3, subtopic: "Light Refraction" },
+            { q: "The focal length of a convex lens is 20 cm. What is its power in Dioptres?", options: ["+5 D", "-5 D", "+2 D", "+0.05 D"], answer: 0, subtopic: "Lens Formula" },
+            { q: "Commercial unit of electrical energy (kWh) is equal to how many Joules?", options: ["3.6 x 10^5 J", "3.6 x 10^6 J", "1000 J", "360 J"], answer: 1, subtopic: "Electrical Power" },
+            { q: "Heat capacity of a body depends on:", options: ["Mass only", "Material only", "Mass and specific heat capacity", "Temperature only"], answer: 2, subtopic: "Calorimetry" }
         ],
         "Chemistry": [
-            { q: "Across a period from left to right, non-metallic character:", options: ["Decreases", "Increases", "Remains same", "First decreases then increases"], answer: 1, subtopic: "Periodic Trends" },
-            { q: "Which element has the highest electron affinity in the Periodic Table?", options: ["Fluorine", "Chlorine", "Oxygen", "Bromine"], answer: 1, subtopic: "Electron Affinity" },
-            { q: "The gas evolved when dilute HCl reacts with Sodium Sulfide is:", options: ["Sulfur dioxide", "Hydrogen sulfide", "Chlorine", "Hydrogen"], answer: 1, subtopic: "Acid Reactions" },
-            { q: "During the electrolysis of molten lead bromide, the cathode product is:", options: ["Lead metal", "Bromine gas", "Hydrogen gas", "Oxygen gas"], answer: 0, subtopic: "Electrolysis Products" },
-            { q: "The IUPAC name of CH3-CH2-CHO is:", options: ["Propanal", "Propanol", "Propanone", "Propanoic acid"], answer: 0, subtopic: "Organic Nomenclature" }
-        ],
-        "Mathematics": [
-            { q: "If the discriminant of ax² + bx + c = 0 is greater than zero, roots are:", options: ["Real and equal", "Real and distinct", "Imaginary", "Zero"], answer: 1, subtopic: "Quadratic Roots" },
-            { q: "The order of a matrix with 3 rows and 2 columns is:", options: ["2 x 3", "3 x 2", "3 x 3", "6"], answer: 1, subtopic: "Matrix Order" },
-            { q: "The value of sin²(60°) + cos²(60°) is:", options: ["0", "1/2", "1", "sqrt(3)/2"], answer: 2, subtopic: "Trigonometric Identities" },
-            { q: "The angle subtended by a semicircle at the circumference is:", options: ["45°", "60°", "90°", "180°"], answer: 2, subtopic: "Circle Geometry" },
-            { q: "GST charged on intra-state supply of goods is split into:", options: ["CGST & SGST", "IGST only", "CGST & IGST", "SGST & IGST"], answer: 0, subtopic: "Commercial Math" }
+            { q: "Moving left to right across a Period, ionization potential generally:", options: ["Decreases", "Increases", "Stays the same", "First drops then rises"], answer: 1, subtopic: "Periodic Trends" },
+            { q: "Electrovalent compounds have high melting points because of:", options: ["Covalent sharing", "Strong electrostatic forces", "Weak van der Waals forces", "Hydrogen bonds"], answer: 1, subtopic: "Chemical Bonding" },
+            { q: "The catalyst used in Haber process for the industrial manufacture of Ammonia is:", options: ["Platinum", "Finely divided Iron", "Nickel", "Vanadium Pentoxide"], answer: 1, subtopic: "Industrial Chemistry" },
+            { q: "During the electrolysis of aqueous CuSO4 using copper electrodes, the anode reaction is:", options: ["Cu -> Cu2+ + 2e-", "Cu2+ + 2e- -> Cu", "Oxygen gas evolution", "Hydrogen evolution"], answer: 0, subtopic: "Electrolysis" },
+            { q: "An organic compound that turns blue litmus red and reacts with NaHCO3 with effervescence is:", options: ["Ethanol", "Ethanoic Acid", "Ethene", "Ethane"], answer: 1, subtopic: "Organic Compounds" }
         ],
         "Computer Applications": [
-            { q: "What is returned by 'JAVAPROGRAM'.indexOf('A')?", options: ["1", "2", "0", "-1"], answer: 0, subtopic: "String Methods" },
-            { q: "Which keyword prevents a method from returning any value?", options: ["static", "void", "public", "final"], answer: 1, subtopic: "Method Signature" },
-            { q: "The default value of a boolean primitive variable in Java is:", options: ["true", "false", "0", "null"], answer: 1, subtopic: "Data Types" },
-            { q: "Which escape sequence represents a new line in Java output?", options: ["\\t", "\\n", "\\r", "\\b"], answer: 1, subtopic: "Output Formatting" },
-            { q: "The process of wrapping data and methods into a single unit is called:", options: ["Inheritance", "Polymorphism", "Encapsulation", "Abstraction"], answer: 2, subtopic: "OOP Concepts" }
+            { q: "What does the method 'JAVA'.concat('PROGRAM').length() return?", options: ["11", "12", "4", "7"], answer: 0, subtopic: "String Methods" },
+            { q: "Which Java wrapper class method parses a String into an integer primitive?", options: ["Integer.parseInt()", "Integer.toString()", "Math.round()", "String.valueOf()"], answer: 0, subtopic: "Wrapper Classes" },
+            { q: "What will be the size of double array `arr` created as `new double[10]`?", options: ["80 bytes", "40 bytes", "10 bytes", "20 bytes"], answer: 0, subtopic: "Arrays & Memory" },
+            { q: "A method that has the same name as the class and no return type is a:", options: ["Static method", "Constructor", "Abstract method", "Final method"], answer: 1, subtopic: "Constructors" },
+            { q: "Which logical operator returns true only when both conditions are true?", options: ["||", "!", "&&", "^"], answer: 2, subtopic: "Java Operators" }
+        ],
+        "Mathematics": [
+            { q: "If matrix A is of order 2x3 and matrix B is of order 3x2, order of product AB is:", options: ["2x2", "3x3", "2x3", "Not possible"], answer: 0, subtopic: "Matrices" },
+            { q: "The discriminant of quadratic equation 2x^2 - 4x + 3 = 0 is:", options: ["-8", "4", "40", "-4"], answer: 0, subtopic: "Quadratic Equations" },
+            { q: "The 10th term of the Arithmetic Progression 2, 7, 12, ... is:", options: ["47", "52", "42", "50"], answer: 0, subtopic: "Arithmetic Progressions" },
+            { q: "If sin(A) = 3/5, then tan(A) equals:", options: ["4/5", "3/4", "4/3", "5/3"], answer: 1, subtopic: "Trigonometry" }
         ],
         "Geography": [
-            { q: "Which wind brings rain to the Coromandel coast during winter?", options: ["South-West Monsoon", "North-East Monsoon", "Western Disturbances", "Loo"], answer: 1, subtopic: "Indian Climate" },
-            { q: "Regur soil is another name for which type of soil?", options: ["Alluvial soil", "Black soil", "Red soil", "Laterite soil"], answer: 1, subtopic: "Soil Types" },
-            { q: "Tidal forests in India are predominantly found in:", options: ["Western Ghats", "Sundarbans Delta", "Thar Desert", "Deccan Plateau"], answer: 1, subtopic: "Vegetation Belts" },
-            { q: "Which method of irrigation is most suitable for arid region conservation?", options: ["Canal", "Drip", "Well", "Inundation"], answer: 1, subtopic: "Water Management" }
+            { q: "Which mechanism brings heavy rain to the Malabar coast in June?", options: ["South-West Monsoon", "North-East Monsoon", "Western Disturbances", "Kal Baisakhi"], answer: 0, subtopic: "Climate of India" },
+            { q: "Which soil type is formed due to intense leaching under high temperature and rainfall?", options: ["Alluvial Soil", "Laterite Soil", "Black Soil", "Red Soil"], answer: 1, subtopic: "Soil Types" },
+            { q: "The leading state in sugarcane production in North India is:", options: ["Punjab", "Uttar Pradesh", "Bihar", "Haryana"], answer: 1, subtopic: "Agriculture" }
         ],
         "History & Civics": [
-            { q: "The ex-officio Chairman of the Rajya Sabha is the:", options: ["Prime Minister", "President", "Vice-President", "Speaker"], answer: 2, subtopic: "Parliamentary Rules" },
-            { q: "Who led the Revolt of 1857 in Kanpur?", options: ["Rani Laxmi Bai", "Nana Saheb", "Kunwar Singh", "Begum Hazrat Mahal"], answer: 1, subtopic: "Revolt of 1857" },
-            { q: "The Partition of Bengal was announced in 1905 by Lord:", options: ["Ripon", "Curzon", "Dalhousie", "Wavell"], answer: 1, subtopic: "National Movement" },
-            { q: "The Supreme Court judges hold office until they reach the age of:", options: ["60 years", "62 years", "65 years", "70 years"], answer: 2, subtopic: "Judiciary System" }
+            { q: "The maximum gap allowed between two sessions of the Indian Parliament is:", options: ["3 months", "6 months", "9 months", "1 year"], answer: 1, subtopic: "Union Legislature" },
+            { q: "Who was proclaimed the leader of the Revolt of 1857 at Delhi?", options: ["Bahadur Shah Zafar", "Nana Saheb", "Tantia Tope", "Rani Laxmi Bai"], answer: 0, subtopic: "Revolt of 1857" },
+            { q: "The Non-Cooperation Movement was suspended by Mahatma Gandhi due to:", options: ["Jallianwala Bagh", "Chauri Chaura Incident", "Rowlatt Act", "Simon Commission"], answer: 1, subtopic: "Mass Phase" }
         ]
     };
 
@@ -219,27 +217,27 @@
         }
     }
 
-    function generateQuestions(subject, chapter, requestedCount) {
-        const baseSet = questionTemplates[subject] || questionTemplates["Biology"];
-        let result = [];
-        
+    function buildDynamicQuestions(subject, chapter, requestedCount) {
+        const pool = questionPool[subject] || questionPool["Biology"];
+        let list = [];
+
         for (let i = 0; i < requestedCount; i++) {
-            const base = baseSet[i % baseSet.length];
-            const variantNumber = Math.floor(i / baseSet.length) + 1;
+            const baseItem = pool[i % pool.length];
+            const setNum = Math.floor(i / pool.length) + 1;
             
-            let qText = base.q;
-            if (variantNumber > 1) {
-                qText = `[Variant ${variantNumber}] ${base.q} (${chapter} concept review)`;
+            let qText = baseItem.q;
+            if (setNum > 1) {
+                qText = `[ICSE Board Q-Set ${setNum}] (${chapter}) - ${baseItem.q}`;
             }
 
-            result.push({
+            list.push({
                 q: qText,
-                options: [...base.options],
-                answer: base.answer,
-                subtopic: base.subtopic
+                options: [...baseItem.options],
+                answer: baseItem.answer,
+                subtopic: baseItem.subtopic
             });
         }
-        return result;
+        return list;
     }
 
     function startQuiz() {
@@ -252,7 +250,7 @@
             return;
         }
 
-        currentQuizData = generateQuestions(subject, chapter, count);
+        currentQuizData = buildDynamicQuestions(subject, chapter, count);
         currentQuestionIndex = 0;
         score = 0;
         userAnswers = [];
